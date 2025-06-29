@@ -1,6 +1,3 @@
-import React, { useState } from 'react';
-import './styles.css';
-
 function App() {
   const [trades, setTrades] = useState([]);
   const [oracleAPY, setOracleAPY] = useState(6.25);
@@ -8,11 +5,13 @@ function App() {
 
   const handleTrade = (direction, dv01) => {
     const newNetOI = direction === 'pay' ? netOI + dv01 : netOI - dv01;
-    const k = 0.01 / 50000; // 50k DV01 = 1% move
+    const k = 0.01 / 50000;
     const priceImpact = newNetOI * k;
     const executionAPY = oracleAPY + (direction === 'pay' ? priceImpact : -priceImpact);
     const margin = dv01 * 20;
-    const liquidation = direction === 'pay' ? executionAPY - 0.2 : executionAPY + 0.2;
+    const liquidation = direction === 'pay'
+      ? executionAPY - 0.2
+      : executionAPY + 0.2;
 
     const newTrade = {
       direction,
@@ -26,50 +25,23 @@ function App() {
     setNetOI(newNetOI);
   };
 
-  const resetSim = () => {
-    setTrades([]);
-    setNetOI(0);
-  };
-
   return (
-    <div className="container">
-      <h1>Slope DV01 Simulator</h1>
-      <div className="input-group">
-        <label>Oracle APY: </label>
-        <input
-          type="number"
-          value={oracleAPY}
-          onChange={(e) => setOracleAPY(parseFloat(e.target.value))}
-        />
-        <button onClick={resetSim}>Reset</button>
-      </div>
-      <div className="buttons">
-        <button onClick={() => handleTrade('pay', 5000)}>Pay Fixed 5k DV01</button>
-        <button onClick={() => handleTrade('pay', 2000)}>Pay Fixed 2k DV01</button>
-        <button onClick={() => handleTrade('receive', 5000)}>Receive Fixed 5k DV01</button>
-      </div>
-      <table>
-        <thead>
-          <tr>
-            <th>Direction</th>
-            <th>DV01</th>
-            <th>APY</th>
-            <th>Margin</th>
-            <th>Liquidation</th>
-          </tr>
-        </thead>
-        <tbody>
-          {trades.map((t, i) => (
-            <tr key={i}>
-              <td>{t.direction}</td>
-              <td>{t.dv01}</td>
-              <td>{t.executionAPY}%</td>
-              <td>${t.margin}</td>
-              <td>{t.liquidation}%</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div>
+      <h1>Slope APY Simulator</h1>
+      <p>Oracle APY: {oracleAPY}%</p>
+      <p>Net OI: {netOI}</p>
+
+      <button onClick={() => handleTrade('pay', 10000)}>Trade: Pay 10K</button>
+      <button onClick={() => handleTrade('receive', 10000)}>Trade: Receive 10K</button>
+
+      <h2>Trades:</h2>
+      <ul>
+        {trades.map((trade, idx) => (
+          <li key={idx}>
+            {trade.direction} | DV01: {trade.dv01} | APY: {trade.executionAPY}% | Margin: {trade.margin} | Liq: {trade.liquidation}
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
